@@ -1,0 +1,147 @@
+// # Lexical elements
+// ## Letters and digits
+letter = "A" … "Z" | "a" … "z"
+decimalDigit = "0" … "9"
+octalDigit   = "0" … "7"
+hexDigit     = "0" … "9" | "A" … "F" | "a" … "f"
+
+// ## Identifiers
+ident = letter { letter | decimalDigit | "_" }
+fullIdent = ident { "." ident }
+messageName = ident
+enumName = ident
+fieldName = ident
+oneofName = ident
+mapName = ident
+serviceName = ident
+rpcName = ident
+messageType = [ "." ] { ident "." } messageName
+enumType = [ "." ] { ident "." } enumName
+
+// ## Integer literals
+intLit     = decimalLit | octalLit | hexLit
+decimalLit = ( "1" … "9" ) { decimalDigit }
+octalLit   = "0" { octalDigit }
+hexLit     = "0" ( "x" | "X" ) hexDigit { hexDigit }
+
+// ## Floating-point literals
+floatLit = ( decimals "." [ decimals ] [ exponent ] | decimals exponent | "."decimals [ exponent ] ) | "inf" | "nan"
+decimals  = decimalDigit { decimalDigit }
+exponent  = ( "e" | "E" ) [ "+" | "-" ] decimals
+
+// ## Boolean
+boolLit = "true" | "false"
+
+// ## String literals
+
+strLit = ( "'" { charValue } "'" ) |  ( '"' { charValue } '"' )
+charValue = hexEscape | octEscape | charEscape | /[^\0\n\\]/
+hexEscape = '\' ( "x" | "X" ) hexDigit hexDigit
+octEscape = '\' octalDigit octalDigit octalDigit
+charEscape = '\' ( "a" | "b" | "f" | "n" | "r" | "t" | "v" | '\' | "'" | '"' )
+quote = "'" | '"'
+
+// ## EmptyStatement
+
+emptyStatement = ";"
+
+// ## Constant
+
+constant = fullIdent | ( [ "-" | "+" ] intLit ) | ( [ "-" | "+" ] floatLit ) | strLit | boolLit
+
+// # Syntax
+
+// The syntax statement is used to define the protobuf version.
+
+syntax = "syntax" "=" quote "proto3" quote ";"
+
+// # Import Statement
+
+// The import statement is used to import another .proto's definitions.
+
+import = "import" [ "weak" | "public" ] strLit ";"
+
+// # Package
+
+// The package specifier can be used to prevent name clashes between protocol message types.
+
+package = "package" fullIdent ";"
+
+// # Option
+
+// Options can be used in proto files, messages, enums and services. An option can be a protobuf defined option or a custom option. For more information, see Options in the language guide.
+
+option = "option" optionName  "=" constant ";"
+optionName = ( ident | "(" fullIdent ")" ) { "." ident }
+
+// # Fields
+
+// Fields are the basic elements of a protocol buffer message. Fields can be normal fields, oneof fields, or map fields. A field has a type and field number.
+
+type = "double" | "float" | "int32" | "int64" | "uint32" | "uint64"
+      | "sint32" | "sint64" | "fixed32" | "fixed64" | "sfixed32" | "sfixed64"
+      | "bool" | "string" | "bytes" | messageType | enumType
+fieldNumber = intLit;
+
+
+// ## Normal field
+
+// Each field has type, name and field number. It may have field options.
+
+field = [ "repeated" ] type fieldName "=" fieldNumber [ "[" fieldOptions "]" ] ";"
+fieldOptions = fieldOption { ","  fieldOption }
+fieldOption = optionName "=" constant
+
+// ## Oneof and oneof field
+
+// A oneof consists of oneof fields and a oneof name.
+
+oneof = "oneof" oneofName "{" { oneofField | emptyStatement } "}"
+oneofField = type fieldName "=" fieldNumber [ "[" fieldOptions "]" ] ";"
+
+// ## Map field
+
+// A map field has a key type, value type, name, and field number. The key type can be any integral or string type.
+
+mapField = "map" "<" keyType "," type ">" mapName "=" fieldNumber [ "[" fieldOptions "]" ] ";"
+keyType = "int32" | "int64" | "uint32" | "uint64" | "sint32" | "sint64" |
+          "fixed32" | "fixed64" | "sfixed32" | "sfixed64" | "bool" | "string"
+
+// ## Reserved
+
+// Reserved statements declare a range of field numbers or field names that cannot be used in this message.
+
+reserved = "reserved" ( ranges | fieldNames ) ";"
+ranges = range { "," range }
+range =  intLit [ "to" ( intLit | "max" ) ]
+fieldNames = fieldName { "," fieldName }
+
+// # Top Level definitions
+
+// ## Enum definition
+
+// The enum definition consists of a name and an enum body. The enum body can have options and enum fields. Enum definitions must start with enum value zero.
+
+enum = "enum" enumName enumBody
+enumBody = "{" { option | enumField | emptyStatement } "}"
+enumField = ident "=" intLit [ "[" enumValueOption { ","  enumValueOption } "]" ]";"
+enumValueOption = optionName "=" constant
+
+// ## Message definition
+
+// A message consists of a message name and a message body. The message body can have fields, nested enum definitions, nested message definitions, options, oneofs, map fields, and reserved statements.
+
+message = "message" messageName messageBody
+messageBody = "{" { field | enum | message | option | oneof | mapField |
+reserved | emptyStatement } "}"
+
+// ## Service definition
+
+service = "service" serviceName "{" { option | rpc | emptyStatement } "}"
+rpc = "rpc" rpcName "(" [ "stream" ] messageType ")" "returns" "(" [ "stream" ]
+messageType ")" (( "{" {option | emptyStatement } "}" ) | ";")
+
+// # Proto file
+
+proto = syntax { import | package | option | topLevelDef | emptyStatement }
+topLevelDef = message | enum | service
