@@ -3,9 +3,18 @@
 const path = require('path');
 const fs = require('fs');
 
-const Lexer = require('./lib/lexer');
+const Lexer = require('../lib/lexer');
 
-const filePath = path.join(__dirname, 'test/figures/test2.proto3');
+const argv = process.argv.slice(2);
+const [ filename ] = argv;
+
+if (!filename) {
+  console.log('Usage:');
+  console.log('    lexer <filename>');
+  process.exit(0);
+}
+
+const filePath = path.resolve(filename);
 const source = fs.readFileSync(filePath, 'utf8');
 
 var lexer = new Lexer(source, filePath);

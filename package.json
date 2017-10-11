@@ -1,6 +1,6 @@
 {
-  "name": "pb",
-  "version": "1.0.0",
+  "name": "protobuf3",
+  "version": "1.0.0-beta1",
   "description": "",
   "main": "index.js",
   "directories": {
