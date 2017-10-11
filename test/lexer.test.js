@@ -15,7 +15,7 @@ function lex(source) {
   } while (token !== TokenCode.EOF);
 
   return tokens;
-};
+}
 
 var source = `syntax = "proto3";
 

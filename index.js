@@ -2,4 +2,4 @@
 
 exports.parse = function (proto) {
 
-}
+};

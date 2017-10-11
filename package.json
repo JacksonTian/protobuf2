@@ -7,11 +7,13 @@
     "lib": "lib"
   },
   "scripts": {
+    "lint": "eslint --fix lib test *.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "eslint": "^4.8.0",
     "expect.js": "^0.3.1"
   }
 }

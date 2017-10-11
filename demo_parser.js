@@ -6,7 +6,7 @@ const fs = require('fs');
 const Lexer = require('./lib/lexer');
 const Parser = require('./lib/parser');
 
-const filePath = path.join(__dirname, 'test/figures/test.proto3');
+const filePath = path.join(__dirname, 'test/figures/test2.proto3');
 const source = fs.readFileSync(filePath, 'utf8');
 
 var lexer = new Lexer(source, filePath);
